@@ -8,7 +8,11 @@ It's kinda inspired by the GameBoy but it has my touch as well uwu
 ```
 
 ### `Is it gonna be a real console ?`
-```Fuck naw. But when I'm done making the specs im gonna make an emulator for it !```
+```
+Fuck naw. But when I'm done making the specs im gonna make an emulator for it !
+And maybe u can too mmmm idk ...
+... who knows maybe it'll an easy starter like the chip-8 hehe
+```
 
 ### `What are the specs ?`
 ```
@@ -19,4 +23,8 @@ and `WC_INS.txt` for the complete instruction set + and opcode encoding.
 ### `And how the hell will you make ROMS for it may I ask ?`
 ```Ima make my own Willy Console Assembler uwu```
 
-`Welp, das Willy Console. Buhbye !`
+```
+Welp, das Willy Console. If you find any issues or have any feedback,
+please tell me !
+```
+`Buhbye !`
