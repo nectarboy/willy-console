@@ -1,5 +1,5 @@
 # `WILLYCONSOLE`
-nectarboy - 2021
+`nectarboy - 2021`
 
 ### `What is Willy Console ?`
 ```
@@ -11,7 +11,10 @@ It's kinda inspired by the GameBoy but it has my touch as well uwu
 ```Fuck naw. But when I'm done making the specs im gonna make an emulator for it !```
 
 ### `What are the specs ?`
-```Check the `WC_TEK.txt` file for a complete technical reference, and `WC_INS.txt` for the complete instruction set + and opcode encoding.```
+```
+Check the `WC_TEK.txt` file for a complete technical reference,
+and `WC_INS.txt` for the complete instruction set + and opcode encoding.
+```
 
 ### `And how the hell will you make ROMS for it may I ask ?`
 ```Ima make my own Willy Console Assembler uwu```
