@@ -4,7 +4,7 @@
 ; ==== Console Specs ==== ;
 
 CPU: 8 bit willy-CPU
-Runs at 2,619,060 hertz
+Runs at 2,409,960 hertz
 
 Resolution: 128x112 pixels
 Color: RGB
@@ -86,11 +86,11 @@ Mode 0 is a tilemap mode, in which VRAM is split into 3 seperate parts:
 Tile data spans from 0x6000 - 0x6fff, each entry is a 2bpp 8x8 tile, making up 16 bytes. This allows up to 256 unique tiledata entries.
 
 ; Tile map
-Tile map spans from 0x7000 - 0x70ff. It is made up of 16x16 tile resolution, allowing 256 entries that make up the BG.
+Tile map spans from 0x7000 - 0x70ff. It is made up of 16x16 tile index entries, representing 256 bytes that make up the BG.
 Entries in the tilemap point to any entry in tiledata to draw; each entry takes one byte.
 
 ; Pallete map
-Pallete map spans from 0x7100 - 0x717f, it is made up of 256 4-bit entries, representing 128 bytes.
+Pallete map spans from 0x7100 - 0x717f (128 bytes), it is made up of 256 4-bit entries, meaning each byte represents 2 entries.
 This area changes its meaning depending on the pallete mode.
 
 In pallete mode 0:
@@ -119,3 +119,36 @@ Instead of pallete entries being used as 3 seperate colors, an entry in PM is us
 Mode 1 is not affected by the pallete mode.
 
 [ maybe we could add a dma for video ? ]
+
+; ---- OM - Object Memory
+
+Object memory is a part of memory dedicated to object/sprite attributes.
+There are 4 bytes per entry; these bytes are: x-coord, y-coord, tile index, and properties.
+
+This is what each OM entry looks like:
+
+    +----------------------------+
+    | X-Coordinate               |
+    |  (+ 8)                     |
+    +----------------------------+
+    | Y-Coordinate               |
+    |  (+ 8)                     |
+    +----------------------------+
+    | Tile Index                 |
+    |  (what tile its drawn as)  |
+    +----------------------------+
+    | Properties                 |
+    |  bit 7: ??                 |
+    |  bit 6: ??                 |
+    |  bit 5: x-flip 1=yes 0=no  |
+    |  bit 4: y-flip 1=yes 0=no  |
+    |  bit 3-0: pallete index    |
+    +----------------------------+
+
+NOTES:
+- Bit 7 and 6 in properties are R/W, but they have no known purpose.
+- Don't confuse pallete index with the BG pallete behavior !
+  This pallete index just points to a pallete entry in PM for object to use.
+
+Despite OM being capable of holding 52 objects, only 32 of said objects can actually be rendered.
+This is due to hardware constraints (lmao). The remaining bytes are still R/W however.
