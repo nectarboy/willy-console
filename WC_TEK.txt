@@ -1,63 +1,64 @@
 ; ==== WILLY CONSOLE - TECHNICAL REFERENCE ==== ;
+  nectarboy - 2021
 
-; ---- Console Specs
+; ==== Console Specs ==== ;
 
 CPU: 8 bit willy-CPU
 Runs at 2,619,060 hertz
 
 Resolution: 128x112 pixels
-Tile size: 8x8 pixels
-Refresh Rate: 59.7hz
+Color: RGB
+Refresh Rate: 60hz
 
 Sound: idk
 
-; ---- Memory Specs
+; ==== Memory Specs ==== ;
 
 Willy Console can address up to 0xffff bytes of memory.
 It has a 16 bit program counter, and a number of 16 bit instructions to do whatever with it.
 
-; Memory Map
+; ---- Memory Map
 
-+--------------------+
-| ROM                |
-|  0x0000 - 0x5fff   |
-|                    |
-|                    |
-|                    |
-|                    |
-+--------------------+
-| VRAM               |
-|  0x6000 - 0x7fff   |
-+--------------------+
-| OM: 0x8000 - 0x80ef|
-+--------------------+
-| PM: 0x80d0 - 0x80ff|
-+--------------------+
-| EM: 0x8100 - 0x8fff|
-+--------------------+
-|      -------       |
-+--------------------+
-| WRAM               |
-|  0xa000 - 0xcfff   |
-|                    |
-+--------------------+
-|      -------       |
-|      -------       |
-+--------------------+
-| IO: 0xf000 - 0xf0ff|
-+--------------------+
-| HI: 0xf100 - 0xffff|
-+--------------------+
+    +--------------------+
+    | ROM                |
+    |  0x0000 - 0x5fff   |
+    |                    |
+    |                    |
+    |                    |
+    |                    |
+    +--------------------+
+    | VRAM               |
+    |  0x6000 - 0x7fff   |
+    +--------------------+
+    | OM: 0x8000 - 0x80ef|
+    +--------------------+
+    | PM: 0x80d0 - 0x80ff|
+    +--------------------+
+    | EM: 0x8100 - 0x8fff|
+    +--------------------+
+    |      -------       |
+    +--------------------+
+    | WRAM               |
+    |  0xa000 - 0xcfff   |
+    |                    |
+    +--------------------+
+    |      -------       |
+    |      -------       |
+    +--------------------+
+    | IO: 0xf000 - 0xf0ff|
+    +--------------------+
+    | HI: 0xf100 - 0xffff|
+    +--------------------+
 
-; Memory Usage
+; ---- Memory Usage
 
 ROM: 0x6000 bytes of ROM found in cartridge.
 If none is available, it just acts as unused memory.
 
 VRAM: 0x2000 bytes of VRAM - made up of tiledata, tilemap, and palletemap.
 
-OM: 0xd0 bytes of object/sprite memory.
-PM: 0x30 bytes of pallete data.
+OM: 0xd0 bytes of object/sprite memory. (4 bytes per entry)
+PM: 0x30 bytes of pallete entry data (3 bytes per entry)
 
 EM: 0xf00 bytes of external RAM found in a cartridge. Can be used for save data, extra ram, or anything.
 If none is available, it just acts as unused memory.
@@ -70,20 +71,51 @@ HI: 0xf00 bytes of hi-RAM used for usually storing temporary data.
 Address spaces marked in a ------- represent 0x1000 spaces of unused memory each.
 dont try to use em cuz u cant write or read from em (reads return 0xff)
 
-; ---- CPU Specs
+; ==== CPU Specs ==== ;
 
-; ---- Video Specs
+; ==== Video Specs ==== ;
 
-MODE 0 - Tile Mode
+; ---- BG MODE 0 - Tile Mode
 
-Mode 0 is a tilemap mode, 
+Mode 0 is a tilemap mode, in which VRAM is split into 3 seperate parts:
+- tile data     (0x6000 - 0x6fff)
+- tile map      (0x7000 - 0x70ff)
+- pallete map   (0x7100 - 0x717f)
 
-MODE 1 - Bitmap Mode
+; Tile data
+Tile data spans from 0x6000 - 0x6fff, each entry is a 2bpp 8x8 tile, making up 16 bytes. This allows up to 256 unique tiledata entries.
 
-Mode 1 transforms the entirety of vram into a bitmap, each pixel capable of displaying one of 16 colors. Like mode 0, it is fully capable of scrolling as well.
+; Tile map
+Tile map spans from 0x7000 - 0x70ff. It is made up of 16x16 tile resolution, allowing 256 entries that make up the BG.
+Entries in the tilemap point to any entry in tiledata to draw; each entry takes one byte.
 
-Each pixel in the bitmap is represented by a 4-bit index pointing to a pallete located in PM.
+; Pallete map
+Pallete map spans from 0x7100 - 0x717f, it is made up of 256 4-bit entries, representing 128 bytes.
+This area changes its meaning depending on the pallete mode.
 
-The pixel order follows the same order as the order the tilemap in mode 0 follows.
+In pallete mode 0:
+Entries correspond to what pallete the tile in tilemap [entry index] will use.
+For example: If palletemap entry 0x10 were 5, then tile at tilemap entry 0x10 will be displayed with pallete 5.  
+
+In pallete mode 1:
+Entries correspond to what pallete any tilemap entry with a specific index will use.
+For example: If palletemap entry 0x0 were 3, then any tile in tilemap entry with the value 0x0 will use pallete 3.
+
+Here's a formula to convert 8 bit colors to RGB, if u wanna make an emu or sumn:
+  R = (color >> 5) << 5
+  G = ((color & 28) >> 2) << 5
+  B = (color & 3) << 6
+
+The remaining space left in VRAM (0x7180 - 0x7fff) is not used but is fully R/W.
+
+; ---- BG MODE 1 - Bitmap Mode
+
+Mode 1 transforms the entirety of vram into a bitmap, each pixel capable of displaying one of 16 colors.
+Like mode 0, it is fully capable of scrolling as well, however objects are not displayed in this mode.
+
+Each pixel in the bitmap is represented by a 4-bit index pointing to a pallete located in PM, meaning each byte in VRAM represents 2 entries.
+Instead of pallete entries being used as 3 seperate colors, an entry in PM is used as a 24-bit RGB color.
+
+Mode 1 is not affected by the pallete mode.
 
 [ maybe we could add a dma for video ? ]
